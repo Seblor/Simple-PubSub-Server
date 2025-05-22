@@ -1,5 +1,7 @@
 import { Room, type BunSocket, type PayloadsFromClients, type PayloadsFromServer } from "./Room";
 
+const port = process.env.PORT || 8080;
+
 const rooms = new Map<string, Room>();
 
 function generateClientId () {
@@ -7,7 +9,7 @@ function generateClientId () {
 }
 
 Bun.serve({
-  port: 8080,
+  port,
   async fetch (req, server) {
     const clientId = generateClientId();
     const reqUrl = new URL(req.url);
@@ -132,4 +134,4 @@ Bun.serve({
   },
 });
 
-console.log("✅ WebSocket server running at ws://localhost:8080");
+console.log(`✅ WebSocket server running at ws://localhost:${port}`);
