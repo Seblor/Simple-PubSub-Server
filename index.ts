@@ -13,7 +13,7 @@ Bun.serve({
   port,
   async fetch (req, server) {
     const reqUrl = new URL(req.url);
-    console.log(req.method, reqUrl.pathname);
+
     // Prevent access to anything other than the root path
     if (req.method !== "GET" || rootPath !== reqUrl.pathname.replace(/\/$/, "")) {
       return new Response("Not found", { status: 404 });
