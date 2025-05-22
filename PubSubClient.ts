@@ -119,7 +119,17 @@ export class PubSubClient<RequestType> {
       this.trigger(data.type, data);
     });
 
-    this.socket.addEventListener("error", alert);
+    this.socket.addEventListener("close", () => {
+      console.warn("Connection closed. Attempting to reconnect...");
+      setTimeout(() => {
+        this.connect(this.url, this.room, this.password, this.clientName);
+      }, 1e3); // Retry after 1 second
+    });
+
+    this.socket.addEventListener("error", (error) => {
+      console.error("WebSocket error:", error);
+      this.socket?.close(); // Ensure the socket is closed on error
+    });
   }
 
   public send (payload: PayloadsFromClients) {
