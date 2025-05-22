@@ -131,6 +131,11 @@ Bun.serve({
           break;
         }
 
+        case "pong": {
+          // do nothing
+          break;
+        }
+
         default:
           ws.send(JSON.stringify({ type: "error", message: "Unknown message type" } satisfies PayloadsFromServer));
       }
