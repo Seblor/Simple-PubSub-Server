@@ -3,7 +3,13 @@ import { Room, type BunSocket, type PayloadsFromClients, type PayloadsFromServer
 const port = process.env.PORT || 8080;
 const rootPath = process.env.ROOT_PATH || "/";
 
+const HEARTBEAT_INTERVAL = 30e3; // 30 seconds
+const PING_PACKET = JSON.stringify({
+  type: "ping",
+} satisfies PayloadsFromServer)
+
 const rooms = new Map<string, Room>();
+const socketsStatus: Record<string, { socket: BunSocket, isAlive: boolean }> = {};
 
 function generateClientId () {
   return crypto.randomUUID();
@@ -67,6 +73,7 @@ Bun.serve({
 
   websocket: {
     open (ws: BunSocket) {
+      socketsStatus[ws.data.clientId] = { socket: ws, isAlive: true };
       const room = rooms.get(ws.data.roomId);
       if (!room) {
         ws.send(JSON.stringify({ type: "error", message: "Room not found" } satisfies PayloadsFromServer));
@@ -81,6 +88,7 @@ Bun.serve({
     },
 
     message (ws: BunSocket, msg) {
+      socketsStatus[ws.data.clientId].isAlive = true; // mark the client as alive
       let data: PayloadsFromClients;
 
       try {
@@ -129,6 +137,7 @@ Bun.serve({
     },
 
     close (ws: BunSocket) {
+      delete socketsStatus[ws.data.clientId];
       const room: Room | undefined = rooms.get(ws.data.roomId);
       const clientId = ws.data.clientId;
       if (room && clientId) {
@@ -140,5 +149,22 @@ Bun.serve({
     },
   },
 });
+
+function ping (ws: BunSocket) {
+  ws.send(PING_PACKET);
+}
+
+setInterval(() => {
+  // console.log('firing interval');
+  for (const client of Object.values(socketsStatus)) {
+    if (!client.isAlive) {
+      client.socket.terminate();
+      return;
+    }
+
+    client.isAlive = false;
+    ping(client.socket);
+  }
+}, HEARTBEAT_INTERVAL);
 
 console.log(`✅ WebSocket server running at ws://localhost:${port}`);

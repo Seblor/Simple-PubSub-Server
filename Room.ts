@@ -1,4 +1,6 @@
 export type PayloadsFromClients = {
+  type: "pong"
+} | {
   type: "change_name",
   text: string;
 } | {
@@ -14,6 +16,8 @@ export type PayloadsFromClients = {
 };
 
 export type PayloadsFromServer = {
+  type: "ping"
+} | {
   type: "share",
   from: string;
   text: string;

@@ -22,6 +22,8 @@
  * The PayloadsFromClients type defines the structure of messages sent from clients to the server.
  */
 export type PayloadsFromClients = {
+  type: "pong"
+} | {
   type: "change_name",
   text: string;
 } | {
@@ -40,6 +42,8 @@ export type PayloadsFromClients = {
  * The PayloadsFromServer type defines the structure of messages sent from the server to clients.
  */
 export type PayloadsFromServer = {
+  type: "ping"
+} | {
   type: "share",
   from: string;
   text: string;
@@ -68,6 +72,7 @@ export class PubSubClient<RequestType> {
     client_list: [],
     error: [],
     init: [],
+    ping: [],
   };
   public clientId: string | null = null;
   public peers: Array<{
@@ -102,6 +107,9 @@ export class PubSubClient<RequestType> {
       }
 
       switch (data.type) {
+        case "ping":
+          this.send({ type: "pong" });
+          break;
         case "init":
           this.clientId = data.clientId;
           break;
