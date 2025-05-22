@@ -1,4 +1,8 @@
-# pubsubserver
+# Simple PubSub Server
+
+This is a simple "PubSub-adjascent" server. It does not follow the PubSub pattern strictly, but it is a simple server that can be used to send and receive messages.
+
+# Install
 
 To install dependencies:
 
