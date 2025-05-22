@@ -1,6 +1,7 @@
 import { Room, type BunSocket, type PayloadsFromClients, type PayloadsFromServer } from "./Room";
 
 const port = process.env.PORT || 8080;
+const rootPath = process.env.ROOT_PATH || "/";
 
 const rooms = new Map<string, Room>();
 
@@ -11,8 +12,14 @@ function generateClientId () {
 Bun.serve({
   port,
   async fetch (req, server) {
-    const clientId = generateClientId();
     const reqUrl = new URL(req.url);
+    console.log(req.method, reqUrl.pathname);
+    // Prevent access to anything other than the root path
+    if (req.method !== "GET" || rootPath !== reqUrl.pathname.replace(/\/$/, "")) {
+      return new Response("Not found", { status: 404 });
+    }
+
+    const clientId = generateClientId();
     const params = reqUrl.searchParams;
 
     const data = {
