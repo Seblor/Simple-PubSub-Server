@@ -79,12 +79,13 @@ Bun.serve({
         ws.send(JSON.stringify({ type: "error", message: "Room not found" } satisfies PayloadsFromServer));
         return;
       }
+
+      ws.send(JSON.stringify({ type: "init", clientId: ws.data.clientId } satisfies PayloadsFromServer));
+
       room.addClient({
         socket: ws,
         id: ws.data.clientId,
       });
-
-      ws.send(JSON.stringify({ type: "init", clientId: ws.data.clientId } satisfies PayloadsFromServer));
     },
 
     message (ws: BunSocket, msg) {
